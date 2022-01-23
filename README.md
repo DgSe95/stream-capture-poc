@@ -123,6 +123,16 @@ mkdir -v samples
 node dump.js
 ```
 
+## Disclaimer
+
+This project has been made in the hope that biggest adult streaming platforms will make sure to really protect the identity and then privacy of their users and models.
+
+I consider to not be responsible about your usage of this project at the moment the code don't break anything in the target websites and only use their lack of security in their API and streaming platform implementation.
+
+Any script kiddies with some browsers and web console knowledge and at least a software like `vlc` or `ffmpeg` is litterally able to dump everything themselves without using this project.
+
+Thus, this project is just a way to make things easier and less repetitive but there is no _real magic_ behind.
+
 ## Credits
 
 Author: [@DgSe95](https://twitter.com/DgSe95)
