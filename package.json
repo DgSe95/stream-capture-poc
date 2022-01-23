@@ -1,0 +1,16 @@
+{
+  "name": "stream-capture-poc",
+  "description": "",
+  "version": "1.0.0",
+  "author": {
+    "name": "DgSe95"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DgSe95/stream-capture-poc.git"
+  },
+  "dependencies": {
+    "puppeteer": "^13.1.1"
+  },
+  "private": true
+}
