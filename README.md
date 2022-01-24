@@ -2,6 +2,18 @@
 
 Stream capture PoC to prove the lack of security in biggest adult streaming platforms.
 
+## Origins
+
+One day, I've discovered the adult streaming platform called __Stripchat__ and decided to look at what I could find in the web console and found several weakness in their API and streaming implementations.
+
+I've made an initial report and contacted them. After a long and very useless discussion and later complete silence, it seems clear to me they didn't considered the high risks for people using their platform(s) while thinking their private information and identity can't be stolen.
+
+So my discoveries were not serious enough I guess for them to understand the problem so gave up for some time until finally deciding to get back on it create something that would prove my discoveries.
+
+Here comes this `PoC` that later gave birth to a bigger project called [porn-dump-cli](https://github.com/DgSe95/porn-dump-cli).
+
+This `PoC` will still be used to implement new features in [porn-dump-cli](https://github.com/DgSe95/porn-dump-cli) so you can keep an eye on it as normally new methods might appears from time to time.
+
 ## Install
 
 Simply run the following commands:
@@ -38,7 +50,7 @@ const stopRecordingOnPreviewClose = true;
 
 > Replace `[username]` by the user/model you want to dump the stream.
 >
-> __*This `PoC` only support [stripchat.com](https://stripchat.com) for the moment.*__
+> __*This `PoC` only support [stripchat.com](https://stripchat.com) for the moment and other white label website based on it (e.g. [xHamsterLive](https://xhamsterlive.com) and [MyCamTV](https://mycamtv.com)).*__
 
 By default, if you enable the `recordAndPlayStreamMP4` or `recordAndPlayStreamMKV` methods, it will stop recording when the `ffplay` preview will be closed but you can change this behavior by changing the following settings:
 
