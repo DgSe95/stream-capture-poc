@@ -10,10 +10,11 @@ const { spawn } = require('child_process');
 
 // Settings
 const dumpURL = 'https://stripchat.com/[username]';
+const outputDir = 'samples';
 const maxRecordTime = false;
 // const maxRecordTime = 60000;
 // const maxRecordTime = (60000*10);
-const useRemoteInstance = true;
+const useRemoteInstance = false;
 const stopRecordingOnPreviewClose = true;
 const pocFile = path.basename(__filename);
 let dumpedURLs = [];
@@ -27,6 +28,12 @@ const getBrowser = () => useRemoteInstance
         : puppeteer.launch();
 
 // Methods
+function createDataFolder(path) {
+  if (!path) { return false; }
+  fs.mkdir(path, { recursive: true }, (err) => {
+    if (err) throw err;
+  });
+}
 function logRequest(interceptedRequest) {
   console.log('A request was made:', interceptedRequest.url());
 }
@@ -110,7 +117,7 @@ function dumpModelIntroURL() {
 
   if (Array.isArray(dumpedURLs) && dumpedURLs.length > 0) {
     dumpedURLs.forEach(dumpedURL => {
-      if (String(dumpedURL).includes('/intros?')) {
+      if (String(dumpedURL).includes('/intros/latest')) {
         modelIntroURL = dumpedURL;
       }
     });
@@ -124,7 +131,7 @@ function dumpModelInfoURL() {
 
   let customModelInfoURL = parsedModelInfoURL.protocol;
   customModelInfoURL += '//' + parsedModelInfoURL.host;
-  customModelInfoURL += parsedModelInfoURL.pathname.replace('/intros', '');
+  customModelInfoURL += parsedModelInfoURL.pathname.replace('/intros/latest', '');
 
   return customModelInfoURL;
 }
@@ -275,7 +282,7 @@ async function playStream(streamURL) {
 async function recordStreamMP4(streamURL, modelName) {
   console.log(`\n[${pocFile}] Recording stream [${streamURL}]...\n`);
 
-  const ffmpeg = spawn('ffmpeg', ['-hide_banner', '-threads', '0', '-y', '-i', streamURL, '-movflags', 'faststart', `samples/${modelName}.mp4`]);
+  const ffmpeg = spawn('ffmpeg', ['-hide_banner', '-threads', '0', '-y', '-i', streamURL, '-movflags', 'faststart', `${outputDir}/${modelName}.mp4`]);
 
   // Killing recording process when max time reached
   let recordingTimeout;
@@ -321,7 +328,7 @@ async function recordStreamMP4(streamURL, modelName) {
 async function recordStreamMKV(streamURL, modelName) {
   console.log(`\n[${pocFile}] Recording stream [${streamURL}]...\n`);
 
-  const ffmpeg = spawn('ffmpeg', ['-hide_banner', '-threads', '0', '-y', '-i', streamURL, `samples/${modelName}.mkv`]);
+  const ffmpeg = spawn('ffmpeg', ['-hide_banner', '-threads', '0', '-y', '-i', streamURL, `${outputDir}/${modelName}.mkv`]);
 
   // Killing recording process when max time reached
   let recordingTimeout;
@@ -388,7 +395,7 @@ async function recordAndPlayStreamMP4(streamURL, modelName) {
     'faststart',
     '-f',
     'tee',
-    `samples/${modelName}.mp4|[f=nut]pipe:`
+    `${outputDir}/${modelName}.mp4|[f=nut]pipe:`
   ]);
 
   const ffplay = spawn('ffplay', ['-hide_banner', 'pipe:']);
@@ -510,7 +517,7 @@ async function recordAndPlayStreamMKV(streamURL, modelName) {
     'aac',
     '-f',
     'tee',
-    `samples/${modelName}.mkv|[f=nut]pipe:`
+    `${outputDir}/${modelName}.mkv|[f=nut]pipe:`
   ]);
 
   const ffplay = spawn('ffplay', ['-hide_banner', 'pipe:']);
@@ -617,7 +624,7 @@ async function doScreenshot(page, modelName) {
   await page.click(agreementSelector);
 
   // Screenshot the page
-  await page.screenshot({ path: `samples/${modelName}.1920x1080.png`, fullPage: false });
+  await page.screenshot({ path: `${outputDir}/${modelName}.1920x1080.png`, fullPage: false });
 
   // Wait for agreement video element to appear
   const videoSelector = '.video-element';
@@ -625,7 +632,7 @@ async function doScreenshot(page, modelName) {
   const videoElement = await page.$(videoSelector);
 
   // Screenshot the cam
-  await videoElement.screenshot({ path: `samples/${modelName}.cam.png` });
+  await videoElement.screenshot({ path: `${outputDir}/${modelName}.cam.png` });
 
   // Release element from memory
   await videoElement.dispose();
@@ -654,6 +661,9 @@ process.on('exit', (code) => {
 (async () => {
   // Fake start status
   console.log(`[${pocFile}] Started.`);
+
+  // Create required output folder
+  createDataFolder(outputDir);
 
   // Init browser instance
   let browser = null;
@@ -747,28 +757,28 @@ process.on('exit', (code) => {
     // Dump stream settings from JSON
     // This stream is the only one found that has some protection like user-agent checks
     // TODO: bypass checks to make results similar to those gathered from real browser
-    await dumpJSON(dumpStreamSettingsURL(), `samples/${parsedModelName}.cam.json`);
+    await dumpJSON(dumpStreamSettingsURL(), `${outputDir}/${parsedModelName}.cam.json`);
 
     // Dump model intro from JSON
-    await dumpJSON(dumpModelIntroURL(), `samples/${parsedModelName}.intro.json`);
+    await dumpJSON(dumpModelIntroURL(), `${outputDir}/${parsedModelName}.intro.json`);
 
     // Dump model info from JSON
-    await dumpJSON(dumpModelInfoURL(), `samples/${parsedModelName}.json`);
+    await dumpJSON(dumpModelInfoURL(), `${outputDir}/${parsedModelName}.json`);
 
     // Dump site config from JSON
-    await dumpJSON(dumpSiteConfigURL(), 'samples/site-config.json');
+    await dumpJSON(dumpSiteConfigURL(), `${outputDir}/site-config.json`);
 
     // Dump site settings from JSON
-    await dumpJSON(dumpSiteSettingsURL(), 'samples/site-settings.json');
+    await dumpJSON(dumpSiteSettingsURL(), `${outputDir}/site-settings.json`);
 
     // Dump all displayed models on site from JSON
-    await dumpJSON(dumpSiteModelsURL(), 'samples/site-models.json');
+    await dumpJSON(dumpSiteModelsURL(), `${outputDir}/site-models.json`);
 
     // Dump all connected models to JSON
-    await dumpJSON(dumpOnlineModelsURL(), 'samples/online-models.json');
+    await dumpJSON(dumpOnlineModelsURL(), `${outputDir}/online-models.json`);
 
     // Show dumped data from file
-    /* readJSON('samples/online-models.json', (err, onlineModels) => {
+    /* readJSON(`${outputDir}/online-models.json`, (err, onlineModels) => {
       if (err) {
         console.error(err);
         return;
